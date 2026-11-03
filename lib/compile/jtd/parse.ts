@@ -11,6 +11,7 @@ import {intRange, IntType} from "../../vocabularies/jtd/type"
 import {parseJson, parseJsonNumber, parseJsonString} from "../../runtime/parseJson"
 import {useFunc} from "../util"
 import validTimestamp from "../../runtime/timestamp"
+import {createInterpretedFunction} from "../../interprete"
 
 type GenParse = (cxt: ParseCxt) => void
 
@@ -66,7 +67,7 @@ export default function compileParser(
     gen.optimize(this.opts.code.optimize)
     const parseFuncCode = gen.toString()
     sourceCode = `${gen.scopeRefs(N.scope)}return ${parseFuncCode}`
-    const makeParse = new Function(`${N.scope}`, sourceCode)
+    const makeParse = createInterpretedFunction(`${N.scope}`, sourceCode)
     const parse: (json: string) => unknown = makeParse(this.scope.get())
     this.scope.value(parseName, {ref: parse})
     sch.parse = parse

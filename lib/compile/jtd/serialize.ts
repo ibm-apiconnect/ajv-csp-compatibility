@@ -9,6 +9,7 @@ import {isOwnProperty} from "../../vocabularies/code"
 import {hasRef} from "../../vocabularies/jtd/ref"
 import {useFunc} from "../util"
 import quote from "../../runtime/quote"
+import {createInterpretedFunction} from "../../interprete"
 
 const genSerialize: {[F in JTDForm]: (cxt: SerializeCxt) => void} = {
   elements: serializeElements,
@@ -62,7 +63,7 @@ export default function compileSerializer(
     gen.optimize(this.opts.code.optimize)
     const serializeFuncCode = gen.toString()
     sourceCode = `${gen.scopeRefs(N.scope)}return ${serializeFuncCode}`
-    const makeSerialize = new Function(`${N.scope}`, sourceCode)
+    const makeSerialize = createInterpretedFunction(`${N.scope}`, sourceCode)
     const serialize: (data: unknown) => string = makeSerialize(this.scope.get())
     this.scope.value(serializeName, {ref: serialize})
     sch.serialize = serialize

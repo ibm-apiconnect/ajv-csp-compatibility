@@ -16,7 +16,7 @@ import {schemaHasRulesButRef, unescapeFragment} from "./util"
 import {validateFunctionCode} from "./validate"
 import {URIComponent} from "fast-uri"
 import {JSONType} from "./rules"
-
+import { createInterpretedFunction } from "../interprete"
 export type SchemaRefs = {
   [Ref in string]?: SchemaEnv | AnySchema
 }
@@ -168,7 +168,7 @@ export function compileSchema(this: Ajv, sch: SchemaEnv): SchemaEnv {
     // console.log((codeSize += sourceCode.length), (nodeCount += gen.nodeCount))
     if (this.opts.code.process) sourceCode = this.opts.code.process(sourceCode, sch)
     // console.log("\n\n\n *** \n", sourceCode)
-    const makeValidate = new Function(`${N.self}`, `${N.scope}`, sourceCode)
+    const makeValidate = createInterpretedFunction(`${N.self}`, `${N.scope}`, sourceCode)
     const validate: AnyValidateFunction = makeValidate(this, this.scope.get())
     this.scope.value(validateName, {ref: validate})
 
