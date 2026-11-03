@@ -27,5 +27,30 @@ export function createInterpretedFunction(
     };
   `)
 
-  return interpreter.exports.makeFunction
+  const makeFunction = interpreter.exports.makeFunction
+
+  const wrappedMakeFunction = function(...args: any[]) {
+    const result = makeFunction(...args)
+    if (typeof result === "function") {
+      const returnFnIdx = sourceCode.indexOf("return function")
+      let fnSource = sourceCode
+      if (returnFnIdx !== -1) {
+        fnSource = sourceCode.substring(returnFnIdx + "return ".length)
+      }
+      Object.defineProperty(result, "toString", {
+        value: () => fnSource,
+        configurable: true,
+        writable: true
+      })
+    }
+    return result
+  }
+
+  Object.defineProperty(wrappedMakeFunction, "toString", {
+    value: () => `function(${params}) {\n${sourceCode}\n}`,
+    configurable: true,
+    writable: true
+  })
+
+  return wrappedMakeFunction
 }

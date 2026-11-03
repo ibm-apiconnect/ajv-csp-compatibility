@@ -1,5 +1,5 @@
 import _Ajv from "../ajv"
-import Ajv from "ajv"
+import type Ajv from "../../dist/core"
 import * as assert from "assert"
 
 describe("integer valid type in number sub-schema (issue #1935)", () => {

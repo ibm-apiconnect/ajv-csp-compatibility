@@ -6,6 +6,18 @@ export abstract class _CodeOrName {
   abstract emptyStr(): boolean
 }
 
+export function isCode(x: unknown): x is _Code {
+  return x instanceof _Code || (x !== null && typeof x === "object" && "_items" in (x as any))
+}
+
+export function isName(x: unknown): x is Name {
+  return x instanceof Name || (x !== null && typeof x === "object" && (x as any).constructor?.name === "Name" && "str" in (x as any) && !("_items" in (x as any)))
+}
+
+export function isCodeOrName(x: unknown): x is _CodeOrName {
+  return x instanceof _CodeOrName || isCode(x) || isName(x)
+}
+
 export const IDENTIFIER = /^[a-z$_][a-z$_0-9]*$/i
 
 export class Name extends _CodeOrName {
@@ -55,7 +67,7 @@ export class _Code extends _CodeOrName {
 
   get names(): UsedNames {
     return (this._names ??= this._items.reduce((names: UsedNames, c) => {
-      if (c instanceof Name) names[c.str] = (names[c.str] || 0) + 1
+      if (isName(c)) names[c.str] = (names[c.str] || 0) + 1
       return names
     }, {}))
   }
@@ -98,8 +110,8 @@ export function str(strs: TemplateStringsArray, ...args: (CodeArg | string[])[])
 }
 
 export function addCodeArg(code: CodeItem[], arg: CodeArg | string[]): void {
-  if (arg instanceof _Code) code.push(...arg._items)
-  else if (arg instanceof Name) code.push(arg)
+  if (isCode(arg)) code.push(...arg._items)
+  else if (isName(arg)) code.push(arg)
   else code.push(interpolate(arg))
 }
 
@@ -122,12 +134,12 @@ function mergeExprItems(a: CodeItem, b: CodeItem): CodeItem | undefined {
   if (b === '""') return a
   if (a === '""') return b
   if (typeof a == "string") {
-    if (b instanceof Name || a[a.length - 1] !== '"') return
+    if (isName(b) || a[a.length - 1] !== '"') return
     if (typeof b != "string") return `${a.slice(0, -1)}${b}"`
     if (b[0] === '"') return a.slice(0, -1) + b.slice(1)
     return
   }
-  if (typeof b == "string" && b[0] === '"' && !(a instanceof Name)) return `"${a}${b.slice(1)}`
+  if (typeof b == "string" && b[0] === '"' && !isName(a)) return `"${a}${b.slice(1)}`
   return
 }
 

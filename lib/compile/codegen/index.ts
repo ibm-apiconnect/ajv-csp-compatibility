@@ -1,5 +1,5 @@
 import type {ScopeValueSets, NameValue, ValueScope, ValueScopeName} from "./scope"
-import {_, nil, _Code, Code, Name, UsedNames, CodeItem, addCodeArg, _CodeOrName} from "./code"
+import {_, nil, _Code, Code, Name, UsedNames, CodeItem, addCodeArg, _CodeOrName, isCode, isName, isCodeOrName} from "./code"
 import {Scope, varKinds} from "./scope"
 
 export {_, str, strConcat, nil, getProperty, stringify, regexpCode, Name, Code} from "./code"
@@ -62,7 +62,7 @@ class Def extends Node {
   }
 
   get names(): UsedNames {
-    return this.rhs instanceof _CodeOrName ? this.rhs.names : {}
+    return isCodeOrName(this.rhs) ? this.rhs.names : {}
   }
 }
 
@@ -162,7 +162,7 @@ class AnyCode extends Node {
   }
 
   get names(): UsedNames {
-    return this.code instanceof _CodeOrName ? this.code.names : {}
+    return isCodeOrName(this.code) ? this.code.names : {}
   }
 }
 
@@ -785,17 +785,17 @@ function addNames(names: UsedNames, from: UsedNames): UsedNames {
 }
 
 function addExprNames(names: UsedNames, from: SafeExpr): UsedNames {
-  return from instanceof _CodeOrName ? addNames(names, from.names) : names
+  return isCodeOrName(from) ? addNames(names, from.names) : names
 }
 
 function optimizeExpr<T extends SafeExpr | Code>(expr: T, names: UsedNames, constants: Constants): T
 function optimizeExpr(expr: SafeExpr, names: UsedNames, constants: Constants): SafeExpr {
-  if (expr instanceof Name) return replaceName(expr)
+  if (isName(expr)) return replaceName(expr)
   if (!canOptimize(expr)) return expr
   return new _Code(
-    expr._items.reduce((items: CodeItem[], c: SafeExpr | string) => {
-      if (c instanceof Name) c = replaceName(c)
-      if (c instanceof _Code) items.push(...c._items)
+    (expr as _Code)._items.reduce((items: CodeItem[], c: SafeExpr | string) => {
+      if (isName(c)) c = replaceName(c)
+      if (isCode(c)) items.push(...c._items)
       else items.push(c)
       return items
     }, [])
@@ -810,9 +810,9 @@ function optimizeExpr(expr: SafeExpr, names: UsedNames, constants: Constants): S
 
   function canOptimize(e: SafeExpr): e is _Code {
     return (
-      e instanceof _Code &&
+      isCode(e) &&
       e._items.some(
-        (c) => c instanceof Name && names[c.str] === 1 && constants[c.str] !== undefined
+        (c) => isName(c) && names[c.str] === 1 && constants[c.str] !== undefined
       )
     )
   }
