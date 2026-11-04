@@ -2,9 +2,31 @@
 
 &nbsp;
 
-# Ajv JSON schema validator
+# 🛠️ About This Fork
 
-The fastest JSON validator for Node.js and browser.
+This is a fork of [ajv](https://github.com/ajv-validator/ajv) (based on v8.20.0) created to improve Content Security Policy (CSP) compliance for secure web environments.
+
+## 🚨 Why Fork?
+
+Upstream Ajv compiles every JSON Schema (and JSON Type Definition parser/serializer) into JavaScript source code and turns it into a function using `new Function()`. This is blocked under CSP unless `unsafe-eval` is allowed in `script-src`, which presents security concerns for browser-based applications that enforce strict CSP rules. Without `unsafe-eval`, schema compilation fails with an error like:
+
+```
+EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script
+```
+
+## ✅ What Was Changed
+
+- 🔁 Replaced `new Function()` with the [SVAL](https://github.com/Siubaak/sval) JavaScript interpreter (see [`lib/interprete.ts`](./lib/interprete.ts)), so the generated validation code is interpreted instead of evaluated. This applies to:
+  - schema compilation ([`lib/compile/index.ts`](./lib/compile/index.ts))
+  - JTD parser generation ([`lib/compile/jtd/parse.ts`](./lib/compile/jtd/parse.ts))
+  - JTD serializer generation ([`lib/compile/jtd/serialize.ts`](./lib/compile/jtd/serialize.ts))
+- 🧪 Adjusted unit tests to work with the interpreted functions.
+- 🔒 Ensures JSON Schema validation can run in environments with strict CSP (e.g. browsers without `unsafe-eval`).
+- 📦 Adds the [`sval`](https://www.npmjs.com/package/sval) runtime dependency.
+
+## Ajv JSON schema validator
+
+JSON validator for Node.js and browser. Upstream Ajv is the fastest JSON validator, but this fork trades some of that speed for CSP compatibility (see [Performance](#performance)).
 
 Supports JSON Schema draft-04/06/07/2019-09/2020-12 ([draft-04 support](https://ajv.js.org/json-schema.html#draft-04) requires ajv-draft-04 package) and JSON Type Definition [RFC8927](https://datatracker.ietf.org/doc/rfc8927/).
 
@@ -90,9 +112,11 @@ Thank you.
 
 ## Performance
 
-Ajv generates code to turn JSON Schemas into super-fast validation functions that are efficient for v8 optimization.
+> **Note for this fork:** the generated validation code is executed by the SVAL interpreter instead of `new Function()`, so it is not JIT-compiled by V8. Validation is slower than in upstream Ajv, and the benchmarks below describe upstream Ajv only. If your environment allows `unsafe-eval` and you need maximum performance, use upstream [`ajv`](https://www.npmjs.com/package/ajv).
 
-Currently Ajv is the fastest and the most standard compliant validator according to these benchmarks:
+Upstream Ajv generates code to turn JSON Schemas into super-fast validation functions that are efficient for v8 optimization.
+
+Upstream Ajv is the fastest and the most standard compliant validator according to these benchmarks:
 
 - [json-schema-benchmark](https://github.com/ebdrup/json-schema-benchmark) - 50% faster than the second place
 - [jsck benchmark](https://github.com/pandastrike/jsck#benchmarks) - 20-190% faster
@@ -137,20 +161,18 @@ Performance of different validators by [json-schema-benchmark](https://github.co
 To install version 8:
 
 ```
-npm install ajv
+npm install ajv-csp-compatibility
 ```
 
 ## <a name="usage"></a>Getting started
-
-Try it in the Node.js REPL: https://runkit.com/npm/ajv
 
 In JavaScript:
 
 ```javascript
 // or ESM/TypeScript import
-import Ajv from "ajv"
+import Ajv from "ajv-csp-compatibility"
 // Node.js require:
-const Ajv = require("ajv")
+const Ajv = require("ajv-csp-compatibility")
 
 const ajv = new Ajv() // options can be passed, e.g. {allErrors: true}
 
