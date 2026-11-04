@@ -83,6 +83,7 @@
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.10",
     "dayjs-plugin-utc": "^0.1.2",
+    "esbuild": "^0.28.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "glob": "^10.3.10",
@@ -95,7 +96,6 @@
     "karma-mocha": "^2.0.1",
     "lint-staged": "^15.2.2",
     "mocha": "^10.3.0",
-    "module-from-string": "^3.3.0",
     "node-fetch": "^3.3.2",
     "nyc": "^15.1.0",
     "prettier": "3.0.3",
@@ -106,6 +106,10 @@
     "tsify": "^5.0.4",
     "typescript": "5.3.3",
     "uri-js": "^4.4.1"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.0.5",
+    "uuid": "^11.1.1"
   },
   "collective": {
     "type": "opencollective",

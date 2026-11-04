@@ -4,8 +4,13 @@ import _Ajv from "./ajv"
 import standaloneCode from "../dist/standalone"
 import ajvFormats from "ajv-formats"
 import * as requireFromString from "require-from-string"
-import {importFromStringSync} from "module-from-string"
+import {transformSync} from "esbuild"
 import * as assert from "assert"
+
+function importFromStringSync(code: string) {
+  const {code: cjs} = transformSync(code, {format: "cjs"})
+  return requireFromString(cjs)
+}
 
 function testExportTypeEsm(moduleCode: string, singleExport: boolean) {
   //Must have
