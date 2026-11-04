@@ -42,7 +42,7 @@
       "text-summary"
     ]
   },
-  "repository": "ajv-validator/ajv",
+  "repository": "https://github.com/ibm-apiconnect/ajv-csp-compatibility.git",
   "keywords": [
     "JSON",
     "schema",
@@ -55,8 +55,7 @@
   ],
   "author": "Evgeny Poberezkin",
   "license": "MIT",
-  "bugs": "https://github.com/ajv-validator/ajv/issues",
-  "homepage": "https://ajv.js.org",
+  "homepage": "https://github.com/ibm-apiconnect/ajv-csp-compatibility/tree/csp-compatibility",
   "runkitExampleFilename": ".runkit_example.js",
   "dependencies": {
     "fast-deep-equal": "^3.1.3",
