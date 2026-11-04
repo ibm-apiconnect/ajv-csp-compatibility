@@ -1,5 +1,5 @@
 {
-  "name": "ajv-csp-compatibility",
+  "name": "@ibmcloud/ajv-csp-compatibility",
   "version": "8.20.0-csp.1",
   "description": "Another JSON Schema Validator",
   "main": "dist/ajv.js",
